@@ -9,69 +9,63 @@ import PriceCard from "./PriceCard";
 import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
-    const navigate = useNavigate();
-    const [cartItems, , , , saveLaterItems] = useCart();
+  const navigate = useNavigate();
+  const [cartItems, , , , saveLaterItems] = useCart();
 
-    const placeOrderHandler = () => navigate("/shipping");
+  const placeOrderHandler = () => navigate("/shipping");
 
-    return (
-        <>
-            <ScrollToTopOnRouteChange />
-            <SeoData title="Shopping Cart | Flipkart.com" />
-            <main className="w-full pt-5">
-                {/* <!-- row --> */}
-                <div className="flex flex-col sm:flex-row gap-3.5 w-full sm:w-11/12 mt-0 sm:mt-4 m-auto ">
-                    {/* <!-- cart column --> */}
-                    <div className="flex-1">
-                        {/* <!-- cart items container --> */}
-                        <div className="flex flex-col shadow bg-white">
-                            <span className="font-medium text-lg px-2 sm:px-8 py-4 border-b">
-                                My Cart ({cartItems?.length})
-                            </span>
-                            {cartItems?.length === 0 ? (
-                                <EmptyCart />
-                            ) : (
-                                cartItems?.map((item, i) => (
-                                    <CartItem
-                                        product={item}
-                                        inCart={true}
-                                        key={i}
-                                    />
-                                ))
-                            )}
-                            <div className="flex justify-between items-center sticky bottom-0 left-0 bg-white">
-                                <button
-                                    onClick={placeOrderHandler}
-                                    disabled={
-                                        cartItems.length < 1 ? true : false
-                                    }
-                                    className={`${cartItems.length < 1 ? "hidden" : "bg-[#fb641b]"} w-full sm:w-1/3 mx-2 sm:mx-6 my-4 py-4 font-bold text-white shadow-sm transition hover:bg-[#e95a16] rounded-sm`}
-                                >
-                                    CONTINUE TO CHECKOUT
-                                </button>
-                            </div>
-                        </div>
-                        {/* <!-- cart items container --> */}
+  return (
+    <>
+      <ScrollToTopOnRouteChange />
+      <SeoData title="Shopping Cart | Flipkart.com" />
+      <main className="w-full pt-5">
+        {/* <!-- row --> */}
+        <div className="flex flex-col sm:flex-row gap-3.5 w-full sm:w-11/12 mt-0 sm:mt-4 m-auto ">
+          {/* <!-- cart column --> */}
+          <div className="flex-1">
+            {/* <!-- cart items container --> */}
+            <div className="flex flex-col shadow bg-white">
+              <span className="font-medium text-lg px-2 sm:px-8 py-4 border-b">
+                My Cart ({cartItems?.length})
+              </span>
+              {cartItems?.length === 0 ? (
+                <EmptyCart />
+              ) : (
+                cartItems?.map((item, i) => (
+                  <CartItem product={item} inCart={true} key={i} />
+                ))
+              )}
+              <div className="flex justify-between items-center sticky bottom-0 left-0 bg-white">
+                <button
+                  onClick={placeOrderHandler}
+                  disabled={cartItems.length < 1 ? true : false}
+                  className={`${cartItems.length < 1 ? "hidden" : "bg-[#fb641b]"} w-full sm:w-1/3 mx-2 sm:mx-6 my-4 py-4 font-bold text-white shadow-sm transition hover:bg-[#e95a16] rounded-sm`}
+                >
+                  CONTINUE TO CHECKOUT
+                </button>
+              </div>
+            </div>
+            {/* <!-- cart items container --> */}
 
-                        {/* <!-- saved for later items container --> */}
-                        <div className="flex flex-col mt-5 shadow bg-white mb-8">
-                            <span className="font-medium text-lg px-2 sm:px-8 py-4 border-b">
-                                Saved For Later ({saveLaterItems?.length})
-                            </span>
-                            {saveLaterItems?.map((item, i) => (
-                                <SaveForLater product={item} key={i} />
-                            ))}
-                        </div>
-                        {/* <!-- saved for later container --> */}
-                    </div>
-                    {/* <!-- cart column --> */}
+            {/* <!-- saved for later items container --> */}
+            <div className="flex flex-col mt-5 shadow bg-white mb-8">
+              <span className="font-medium text-lg px-2 sm:px-8 py-4 border-b">
+                Saved For Later ({saveLaterItems?.length})
+              </span>
+              {saveLaterItems?.map((item, i) => (
+                <SaveForLater product={item} key={i} />
+              ))}
+            </div>
+            {/* <!-- saved for later container --> */}
+          </div>
+          {/* <!-- cart column --> */}
 
-                    <PriceCard cartItems={cartItems} />
-                </div>
-                {/* <!-- row --> */}
-            </main>
-        </>
-    );
+          <PriceCard cartItems={cartItems} />
+        </div>
+        {/* <!-- row --> */}
+      </main>
+    </>
+  );
 };
 
 export default Cart;

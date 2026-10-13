@@ -3,54 +3,88 @@ import asyncHandler from "express-async-handler";
 import UserModel from "../models/userModel.js";
 
 const requireSignIn = asyncHandler(async (req, res, next) => {
-    const token = req.headers.authorization?.replace(/^Bearer\s+/i, "");
-    if (!token) return res.status(401).json({ success: false, message: "Authentication required." });
-    if (!process.env.JWT_SECRET) return res.status(503).json({ success: false, message: "Authentication is not configured." });
+  const token = req.headers.authorization?.replace(/^Bearer\s+/i, "");
+  if (!token)
+    return res
+      .status(401)
+      .json({ success: false, message: "Authentication required." });
+  if (!process.env.JWT_SECRET)
+    return res
+      .status(503)
+      .json({ success: false, message: "Authentication is not configured." });
 
-    let decoded;
-    try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch {
-        return res.status(401).json({ success: false, message: "Invalid or expired session." });
-    }
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch {
+    return res
+      .status(401)
+      .json({ success: false, message: "Invalid or expired session." });
+  }
 
-    req.user = await UserModel.findById(decoded._id);
-    if (!req.user || req.user.role !== 0) {
-        return res.status(401).json({ success: false, message: "Unauthorised User" });
-    }
-    next();
+  req.user = await UserModel.findById(decoded._id);
+  if (!req.user || req.user.role !== 0) {
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorised User" });
+  }
+  next();
 });
 
 const requireAuthenticated = asyncHandler(async (req, res, next) => {
-    const token = req.headers.authorization?.replace(/^Bearer\s+/i, "");
-    if (!token) return res.status(401).json({ success: false, message: "Authentication required." });
-    if (!process.env.JWT_SECRET) return res.status(503).json({ success: false, message: "Authentication is not configured." });
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = await UserModel.findById(decoded._id).select("+password");
-    } catch {
-        return res.status(401).json({ success: false, message: "Invalid or expired session." });
-    }
-    if (!req.user) return res.status(401).json({ success: false, message: "Invalid or expired session." });
-    next();
+  const token = req.headers.authorization?.replace(/^Bearer\s+/i, "");
+  if (!token)
+    return res
+      .status(401)
+      .json({ success: false, message: "Authentication required." });
+  if (!process.env.JWT_SECRET)
+    return res
+      .status(503)
+      .json({ success: false, message: "Authentication is not configured." });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = await UserModel.findById(decoded._id).select("+password");
+  } catch {
+    return res
+      .status(401)
+      .json({ success: false, message: "Invalid or expired session." });
+  }
+  if (!req.user)
+    return res
+      .status(401)
+      .json({ success: false, message: "Invalid or expired session." });
+  next();
 });
 
 const isAdmin = asyncHandler(async (req, res, next) => {
-    const token = req.headers.authorization?.replace(/^Bearer\s+/i, "");
-    if (!token) return res.status(401).json({ success: false, message: "Authentication required." });
-    if (!process.env.JWT_SECRET) return res.status(503).json({ success: false, message: "Authentication is not configured." });
+  const token = req.headers.authorization?.replace(/^Bearer\s+/i, "");
+  if (!token)
+    return res
+      .status(401)
+      .json({ success: false, message: "Authentication required." });
+  if (!process.env.JWT_SECRET)
+    return res
+      .status(503)
+      .json({ success: false, message: "Authentication is not configured." });
 
-    let decoded;
-    try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch {
-        return res.status(401).json({ success: false, message: "Invalid or expired session." });
-    }
-    req.user = await UserModel.findById(decoded._id);
-    if (!req.user || req.user.role !== 1) {
-        return res.status(403).json({ success: false, message: "Access denied. Admin privileges required." });
-    }
-    next();
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch {
+    return res
+      .status(401)
+      .json({ success: false, message: "Invalid or expired session." });
+  }
+  req.user = await UserModel.findById(decoded._id);
+  if (!req.user || req.user.role !== 1) {
+    return res
+      .status(403)
+      .json({
+        success: false,
+        message: "Access denied. Admin privileges required.",
+      });
+  }
+  next();
 });
 
 export { requireSignIn, requireAuthenticated, isAdmin };

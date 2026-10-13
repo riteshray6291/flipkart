@@ -4,7 +4,11 @@ import { loginController } from "../controllers/auth/loginController.js";
 import { forgotPasswordController } from "../controllers/auth/forgotPassword.js";
 import { updateDetailsController } from "../controllers/auth/updateDetails.js";
 import { deactivateController } from "../controllers/auth/deactivateAccount.js";
-import { isAdmin, requireAuthenticated, requireSignIn } from "../middleware/authMiddleware.js";
+import {
+  isAdmin,
+  requireAuthenticated,
+  requireSignIn,
+} from "../middleware/authMiddleware.js";
 
 //router object
 const router = express.Router();
@@ -23,20 +27,20 @@ router.post("/forgot-password", requireAuthenticated, forgotPasswordController);
 
 //protected route-user
 router.get("/user-auth", requireSignIn, (req, res) => {
-    try {
-        res.status(200).send({
-            ok: true,
-        });
-    } catch (error) {
-        console.log(error);
-    }
+  try {
+    res.status(200).send({
+      ok: true,
+    });
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 //protected Admin route
 router.get("/admin-auth", isAdmin, (req, res) => {
-    res.status(200).send({
-        ok: true,
-    });
+  res.status(200).send({
+    ok: true,
+  });
 });
 
 // update details POST route\

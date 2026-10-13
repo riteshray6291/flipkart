@@ -1,7 +1,7 @@
 import ComingSoon from "../ComingSoon";
 
 const PaymentCards = () => {
-    return <ComingSoon />;
+  return <ComingSoon />;
 };
 
 export default PaymentCards;

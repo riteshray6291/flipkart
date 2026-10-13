@@ -9,7 +9,12 @@ import getOrderDetail from "../controllers/user/getOrderDetail.js";
 import getAdminOrders from "../controllers/user/getAdminOrders.js";
 import updateOrder from "../controllers/user/updateOrder.js";
 import getAllUserOrder from "../controllers/user/getAllUserOrder.js";
-import { getCart, saveCart, getShippingInfo, saveShippingInfo } from "../controllers/user/cart.js";
+import {
+  getCart,
+  saveCart,
+  getShippingInfo,
+  saveShippingInfo,
+} from "../controllers/user/cart.js";
 
 //router object
 const router = express.Router();

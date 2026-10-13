@@ -1,6 +1,6 @@
 import ComingSoon from "../ComingSoon";
 const Reviews = () => {
-    return <ComingSoon />;
+  return <ComingSoon />;
 };
 
 export default Reviews;

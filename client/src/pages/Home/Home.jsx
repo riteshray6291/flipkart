@@ -18,50 +18,50 @@ import Suggestion from "./Suggestions/Suggestion";
 import SeoData from "../../SEO/SeoData";
 
 const Home = () => {
-    return (
-        <>
-            <SeoData title="Online Shopping Site for Mobiles, Electronics, Furniture, Grocery, Lifestyle, Books & More. Best Offers!" />
-            <ScrollToTopOnRouteChange />
-            <Categories />
-            <main className="flex flex-col items-center gap-3 px-2 pb-5 sm:mt-2">
-                {/* <pre className="min-h-[60vh]">
+  return (
+    <>
+      <SeoData title="Online Shopping Site for Mobiles, Electronics, Furniture, Grocery, Lifestyle, Books & More. Best Offers!" />
+      <ScrollToTopOnRouteChange />
+      <Categories />
+      <main className="flex flex-col items-center gap-3 px-2 pb-5 sm:mt-2">
+        {/* <pre className="min-h-[60vh]">
                     {JSON.stringify(auth, null, 3)}
                 </pre> */}
-                <Banner />
-                <DealSlider title={"Discounts for You"} />
-                <ProductSlider
-                    title={"Best of Electronics"}
-                    products={electronicProducts}
-                    logo={electronics}
-                />
-                <ProductSlider
-                    title={"Beauty, Toys & More"}
-                    products={accessories}
-                    logo={accessoryCard}
-                />
-                <Suggestion
-                    title={"Suggested for You"}
-                    tagline={"Based on Your Activity"}
-                />
+        <Banner />
+        <DealSlider title={"Discounts for You"} />
+        <ProductSlider
+          title={"Best of Electronics"}
+          products={electronicProducts}
+          logo={electronics}
+        />
+        <ProductSlider
+          title={"Beauty, Toys & More"}
+          products={accessories}
+          logo={accessoryCard}
+        />
+        <Suggestion
+          title={"Suggested for You"}
+          tagline={"Based on Your Activity"}
+        />
 
-                <ProductSlider
-                    title={"Fashion Top Deals"}
-                    products={fashionProducts}
-                    logo={fashionCard}
-                />
-                <ProductSlider
-                    title={"TVs & Appliances"}
-                    products={applianceProducts}
-                    logo={applianceCard}
-                />
-                <ProductSlider
-                    title={"Furniture & More"}
-                    products={furnitureProducts}
-                    logo={furnitureCard}
-                />
-            </main>
-        </>
-    );
+        <ProductSlider
+          title={"Fashion Top Deals"}
+          products={fashionProducts}
+          logo={fashionCard}
+        />
+        <ProductSlider
+          title={"TVs & Appliances"}
+          products={applianceProducts}
+          logo={applianceCard}
+        />
+        <ProductSlider
+          title={"Furniture & More"}
+          products={furnitureProducts}
+          logo={furnitureCard}
+        />
+      </main>
+    </>
+  );
 };
 
 export default Home;

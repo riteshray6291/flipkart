@@ -10,6 +10,7 @@ This is a Flipkart clone eCommerce project developed using the MERN (MongoDB, Ex
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [Environment Variables](#environment-variables)
+- [System Design](SYSTEM_DESIGN.md)
 
 ## Features
 
@@ -81,6 +82,7 @@ Before you begin, ensure you have met the following requirements:
 PORT=8080
 CORS_ORIGINS=https://your-frontend.example
 MONGODB_URI=YOUR_MONGODB_BASE_URI/database_name
+MONGODB_DATABASE=ecommerce
 JWT_SECRET=RANDOM_STRING
 CLOUD_NAME=CLOUDINARY_CLOUD_NAME
 CLOUD_API_KEY=CLOUDINARY_API_KEY

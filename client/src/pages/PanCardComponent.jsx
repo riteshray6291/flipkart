@@ -1,7 +1,7 @@
 import ComingSoon from "./ComingSoon";
 
 const PanCardComponent = () => {
-    return <ComingSoon />;
+  return <ComingSoon />;
 };
 
 export default PanCardComponent;

@@ -1,26 +1,32 @@
-# Simple System Design
+# E-Commerce System Design
 
-This project is a Flipkart-style shopping app built as one React frontend, one Express backend, and one MongoDB database. The checkout uses a fake payment simulation. It does not connect to a real payment provider or charge money.
+## What the system does
 
-## Main parts
+This application is a React shopping website backed by an Express API and MongoDB. The browser sends API requests to the backend. The backend checks access, applies business rules, and reads or writes application data in MongoDB.
 
 ```mermaid
 flowchart LR
-    Shopper[Shopper] --> Web[React + Vite]
-    Web --> API[Express API]
-    API --> Auth[JWT authentication]
-    API --> Products[Product and stock data]
-    API --> Users[Cart and delivery address]
-    API --> Orders[Order records]
+    Shopper --> Web[React + Vite]
+    Web -->|HTTPS API requests| API[Express API]
+    API -->|JWT-protected routes| Auth[Authentication and authorization]
+    API --> Catalog[Product and affiliate services]
+    API --> Orders[Cart, checkout, and orders]
     Auth --> DB[(MongoDB)]
-    Products --> DB
-    Users --> DB
+    Catalog --> DB
     Orders --> DB
+    Catalog -. optional .-> Affiliate[Flipkart Affiliate API]
+    Web -. demo catalog .-> Demo[Fake Store API]
+    API -. product images .-> Cloudinary
 ```
 
-- **React frontend:** product pages, cart, checkout, payment result, confirmation, and order history.
-- **Express backend:** authenticates requests, validates checkout, and exposes the API routes.
-- **MongoDB:** stores users, products, cart and address data, stock, and orders.
+## How a request reaches the data
+
+1. The browser loads the React app from the frontend host.
+2. Vite embeds `VITE_SERVER_URL` into the app at build time. The app sends API requests to that backend origin.
+3. Express checks the request origin against `CORS_ORIGINS`. In local development, it also allows the Vite origins on ports 5173 and 5174.
+4. Public routes handle actions such as login and registration. Protected routes verify the JWT in the `Authorization` header and enforce customer or administrator access.
+5. Controllers apply business rules and use Mongoose models to read or write MongoDB.
+6. Express returns JSON. The frontend displays the result.
 
 ## Checkout flow
 
@@ -30,45 +36,38 @@ sequenceDiagram
     participant Web as React app
     participant API as Express API
     participant DB as MongoDB
-    Shopper->>Web: Add products to cart
-    Shopper->>Web: Enter delivery address and choose payment
-    Web->>API: Submit payment simulation and checkout key
-    API->>DB: Read cart, current prices, and stock
-    API->>API: Calculate total and simulate result
-    alt Payment succeeds or COD is selected
-        API->>DB: Save confirmed order and update stock
-        API->>DB: Clear purchased cart items
-        API-->>Web: Return order details
-        Web-->>Shopper: Show order confirmation
-    else Simulated payment fails
-        API->>DB: Save failed attempt; keep cart and stock
-        API-->>Web: Return failed payment result
-        Web-->>Shopper: Show retry option
-    end
+    Shopper->>Web: Submit address and order
+    Web->>API: Send checkout request with JWT
+    API->>DB: Load cart, prices, and stock
+    API->>API: Validate order and calculate total
+    API->>DB: Save order and update stock
+    API-->>Web: Return order result
+    Web-->>Shopper: Show confirmation or failure
 ```
 
-## Order and payment states
+Production checkout currently supports Cash on Delivery. Card, UPI, and netbanking outcomes are development simulations; they do not charge money. Integrate a real payment provider and verified webhooks before offering online payments.
 
-| Scenario | Payment status | Order status | Cart |
-|---|---|---|---|
-| Demo payment succeeds | `PAID` | `CONFIRMED` | Cleared after save |
-| Demo payment fails | `FAILED` | `PAYMENT_FAILED` | Kept for retry |
-| Cash on Delivery | `PENDING` | `CONFIRMED` | Cleared after save |
+## Configuration by environment
 
-## Important rules
+| Setting | Local development | Production |
+| --- | --- | --- |
+| Frontend API URL | `http://localhost:8080` | Backend's public HTTPS origin |
+| `CORS_ORIGINS` | Optional; Vite localhost origins are allowed | Exact frontend HTTPS origin(s), comma-separated |
+| `NODE_ENV` | Omit or use `development` | `production` |
+| `MONGODB_URI` | Local or Atlas database URI | Production database URI; allow the backend host in Atlas Network Access |
+| `MONGODB_DATABASE` | Defaults to `ecommerce` | Set to the intended database name |
+| `JWT_SECRET` | Private development secret | Random secret at least 32 bytes long |
+| Payments | Demo simulations and COD | COD only until a real provider is integrated |
 
-- The server reads product prices and stock from MongoDB. It does not trust prices sent by the browser.
-- A checkout key prevents repeated clicks from creating duplicate orders.
-- Stock changes only after success or COD, and the cart clears only after the order is saved.
-- Order APIs require sign-in, and customers can only view their own orders.
-- Never collect or save card numbers, CVV, UPI PIN, OTP, or bank passwords. The payment screen is a simulation.
+The production frontend build rejects a missing, local, non-HTTPS, or malformed API URL. The backend rejects invalid CORS entries and requires HTTPS origins in production. Do not commit `.env` files or put backend secrets in frontend variables.
 
-## Main API routes
+## Deployment sequence
 
-```text
-GET  /api/v1/user/cart
-PUT  /api/v1/user/shipping-info
-POST /api/v1/user/payments/simulate
-GET  /api/v1/user/orders
-GET  /api/v1/user/orders/:id
-```
+1. Deploy MongoDB and allow the backend host's outbound IP in Atlas Network Access.
+2. Deploy the backend with `NODE_ENV=production`, `MONGODB_URI`, a strong `JWT_SECRET`, and `CORS_ORIGINS` set to the frontend's exact origin. Add Cloudinary and affiliate credentials if those features are needed.
+3. Deploy the frontend with `VITE_SERVER_URL` set to the backend's HTTPS origin, then build the client.
+4. Open the frontend and check `GET /health` on the API. A `200` response means MongoDB is connected; `503` means the database is unavailable.
+
+## Current deployment limitation
+
+The local backend did not start during the latest connection attempt because it could not reach its MongoDB Atlas cluster. The connection error recommends checking Atlas Network Access and network reachability. Resolve that before expecting API routes to work. The frontend and backend URLs are configured for local development as `http://localhost:8080`.

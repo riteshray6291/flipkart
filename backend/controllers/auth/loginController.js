@@ -4,64 +4,66 @@ import JWT from "jsonwebtoken";
 
 //POST LOGIN
 export const loginController = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const normalizedEmail = String(email || "").trim().toLowerCase();
+  try {
+    const { email, password } = req.body;
+    const normalizedEmail = String(email || "")
+      .trim()
+      .toLowerCase();
 
-        //Checking the EMAIL and PASSWORD
-        if (!email || !password) {
-            return res.status(401).send({
-                success: false,
-                message: "Invalid username or password",
-                errorType: "invalidCredentials",
-            });
-        }
-
-        //FINDING THE USER
-        const user = await userModel.findOne({ email: normalizedEmail }).select("+password");
-
-        if (!user) {
-            return res.status(401).send({
-                success: false,
-                message: "Invalid email or password.",
-            });
-        }
-
-        //IF USER EXISTS-CHECKING THE PASSWORD
-        const match = await comparePassword(password, user.password);
-        if (!match) {
-            return res.status(401).send({
-                success: false,
-                message: "Invalid email or password.",
-            });
-        }
-
-        //TOKEN
-        const token = await JWT.sign(
-            { _id: user._id },
-            process.env.JWT_SECRET,
-            { expiresIn: "7d" }
-        );
-
-        //SUCCESS RESPONSE
-        res.status(200).send({
-            success: true,
-            message: "Logged in Successfully!",
-            user: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                phone: user.phone,
-                address: user.address,
-                role: user.role,
-            },
-            token,
-        });
-    } catch (error) {
-        console.log("Login error: " + error);
-        res.status(500).send({
-            success: false,
-            message: "Error in Login",
-        });
+    //Checking the EMAIL and PASSWORD
+    if (!email || !password) {
+      return res.status(401).send({
+        success: false,
+        message: "Invalid username or password",
+        errorType: "invalidCredentials",
+      });
     }
+
+    //FINDING THE USER
+    const user = await userModel
+      .findOne({ email: normalizedEmail })
+      .select("+password");
+
+    if (!user) {
+      return res.status(401).send({
+        success: false,
+        message: "Invalid email or password.",
+      });
+    }
+
+    //IF USER EXISTS-CHECKING THE PASSWORD
+    const match = await comparePassword(password, user.password);
+    if (!match) {
+      return res.status(401).send({
+        success: false,
+        message: "Invalid email or password.",
+      });
+    }
+
+    //TOKEN
+    const token = await JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    //SUCCESS RESPONSE
+    res.status(200).send({
+      success: true,
+      message: "Logged in Successfully!",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        role: user.role,
+      },
+      token,
+    });
+  } catch (error) {
+    console.log("Login error: " + error);
+    res.status(500).send({
+      success: false,
+      message: "Error in Login",
+    });
+  }
 };
