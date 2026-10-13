@@ -4,16 +4,31 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "VITE_");
-  const configuredServerUrl = (env.VITE_SERVER_URL || env.VITE_API || "http://localhost:8080").trim();
+  const localServerUrl = "http://localhost:8080";
+  const configuredServerUrl = (
+    env.VITE_SERVER_URL ||
+    env.VITE_API ||
+    (mode === "production" ? "" : localServerUrl)
+  ).trim();
   const serverUrl = configuredServerUrl.replace(/\/+$/, "");
 
-  if (mode === "production") {
-    const hostname = new URL(serverUrl).hostname;
-    const isLocalhost = hostname === "localhost" || hostname.startsWith("127.") || hostname === "::1";
+  if (mode === "production" && serverUrl) {
+    let apiUrl;
+    try {
+      apiUrl = new URL(serverUrl);
+    } catch {
+      throw new Error(
+        "VITE_SERVER_URL must be an absolute HTTPS URL in production.",
+      );
+    }
 
-    if (isLocalhost) {
-      console.warn(
-        "[vite] Using localhost for the API in this local build. For deployment, set VITE_SERVER_URL to your live backend URL.",
+    const isLocalhost =
+      apiUrl.hostname === "localhost" ||
+      apiUrl.hostname.startsWith("127.") ||
+      apiUrl.hostname === "::1";
+    if (apiUrl.protocol !== "https:" || isLocalhost) {
+      throw new Error(
+        "VITE_SERVER_URL must use HTTPS and cannot point to localhost in production.",
       );
     }
   }

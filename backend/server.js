@@ -90,9 +90,9 @@ app.use(
   cors({
     origin(origin, callback) {
       if (!origin || allowedOrigins.has(origin)) return callback(null, true);
-      const error = new Error("Origin is not allowed by CORS.");
-      error.status = 403;
-      return callback(error);
+      // Let the request continue without CORS headers. Same-origin requests
+      // work without CORS, while browsers block unapproved cross-origin reads.
+      return callback(null, false);
     },
     credentials: true,
   }),
@@ -122,6 +122,50 @@ app.use(express.urlencoded({ extended: false, limit: "100kb" }));
 // Serve the built frontend here when deploying both apps together.
 // app.use(express.static(path.join(__dirname, "../client/dist")));
 const PORT = process.env.PORT || 8080;
+
+const validateConfiguration = () => {
+  if (isProduction) {
+    if (
+      !process.env.JWT_SECRET ||
+      Buffer.byteLength(process.env.JWT_SECRET, "utf8") < 32
+    ) {
+      throw new Error("Production requires a JWT_SECRET of at least 32 bytes.");
+    }
+    if (process.env.PAYMENT_MODE === "fake") {
+      throw new Error("PAYMENT_MODE=fake is not allowed in production.");
+    }
+  } else if (!process.env.JWT_SECRET) {
+    throw new Error(
+      "JWT_SECRET is required. Add a private secret to backend/.env.",
+    );
+  }
+};
+
+let databaseConnection;
+const ensureDatabaseConnection = () => {
+  if (mongoose.connection.readyState === 1) return Promise.resolve();
+
+  if (!databaseConnection) {
+    databaseConnection = connectDB().catch((error) => {
+      databaseConnection = null;
+      throw error;
+    });
+  }
+
+  return databaseConnection;
+};
+
+// Vercel invokes the exported Express app per request. Connect once per warm
+// function instance, and reuse Mongoose's connection for later requests.
+app.use(async (req, res, next) => {
+  try {
+    validateConfiguration();
+    await ensureDatabaseConnection();
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+});
 
 app.get("/", (req, res) => {
   res.status(200).json({ service: "e-commerce-api", status: "ok" });
@@ -159,28 +203,8 @@ app.use((error, req, res, next) => {
 
 const startServer = async () => {
   try {
-    if (isProduction) {
-      if (
-        !process.env.JWT_SECRET ||
-        Buffer.byteLength(process.env.JWT_SECRET, "utf8") < 32
-      ) {
-        throw new Error(
-          "Production requires a JWT_SECRET of at least 32 bytes.",
-        );
-      }
-      if (process.env.PAYMENT_MODE === "fake") {
-        throw new Error("PAYMENT_MODE=fake is not allowed in production.");
-      }
-      if (!allowedOrigins.size)
-        throw new Error(
-          "Production requires CORS_ORIGINS to contain the frontend origin.",
-        );
-    } else if (!process.env.JWT_SECRET) {
-      throw new Error(
-        "JWT_SECRET is required. Add a private secret to backend/.env.",
-      );
-    }
-    await connectDB();
+    validateConfiguration();
+    await ensureDatabaseConnection();
     const server = app.listen(PORT, () => {
       console.log(`API listening on port ${PORT}`);
     });
@@ -200,4 +224,11 @@ const startServer = async () => {
   }
 };
 
-startServer();
+// Keep `npm start` for local development. Vercel imports the default export
+// and manages the request lifecycle itself.
+const isMainModule =
+  process.argv[1] && path.resolve(process.argv[1]) === __filename;
+
+if (isMainModule) startServer();
+
+export default app;

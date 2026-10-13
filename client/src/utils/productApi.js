@@ -3,7 +3,7 @@ import axios from "axios";
 const SERVER_URL = (
   import.meta.env.VITE_SERVER_URL ||
   import.meta.env.VITE_API ||
-  "http://localhost:8080"
+  ""
 ).replace(/\/$/, "");
 const DEMO_API_URL = (
   import.meta.env.VITE_DEMO_API_URL || "https://fakestoreapi.com"

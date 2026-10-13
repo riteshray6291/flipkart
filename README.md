@@ -101,7 +101,15 @@ VITE_DEMO_API_URL=https://fakestoreapi.com
 
 For MongoDB Atlas, create a database user, allow the backend host in Atlas Network Access, and use the generated `mongodb+srv://` URI as `MONGODB_URI`. URL-encode special characters in the username or password. Keep `.env` files out of source control and never put database credentials in `client/.env`.
 
-For production, set `NODE_ENV=production`, use a 32-byte-or-longer random `JWT_SECRET`, set `CORS_ORIGINS` to the exact HTTPS frontend origin(s), and set `VITE_SERVER_URL` to the HTTPS API origin before building the client. The API exposes `/health` for deployment health checks and refuses to start with weak auth configuration or fake payment mode. Public registration creates customer accounts only; grant administrator access through a trusted operations process.
+For production, set `NODE_ENV=production` and use a 32-byte-or-longer random `JWT_SECRET`. Configure `CORS_ORIGINS` with exact HTTPS origins only when the frontend is hosted separately; same-origin deployments do not require CORS. Set `VITE_SERVER_URL` to the HTTPS API origin only when the API is hosted separately. The API exposes `/health` for deployment health checks and refuses requests with weak auth configuration or fake payment mode. Public registration creates customer accounts only; grant administrator access through a trusted operations process.
+
+### Deploy both apps to Vercel
+
+The root `vercel.json` configures the Vite frontend and Express API as Vercel Services. In the Vercel project settings, select **Services** as the framework, then import this repository from its root directory. `/api/*` requests are routed to the backend and all other requests go to the frontend. Since both services share one origin, the frontend uses relative API URLs by default; set `VITE_SERVER_URL` only when hosting the API on a separate HTTPS origin.
+
+Add these backend environment variables in Vercel for Production and Preview as needed: `NODE_ENV=production`, `MONGODB_URI`, `MONGODB_DATABASE=ecommerce`, and a private `JWT_SECRET` with at least 32 bytes. Add Cloudinary and affiliate credentials only when those features are configured. Allow the Vercel backend to reach the MongoDB Atlas cluster in Atlas Network Access. Do not upload either local `.env` file; `.vercelignore` excludes them.
+
+Vercel Services are currently in beta. Deploying requires a Vercel account and a project configured to use the Services framework.
 
 Production checkout currently supports Cash on Delivery. The card, UPI, and netbanking selections in development are simulations and are deliberately unavailable in production. A real online payment provider and verified webhook flow must be integrated before accepting online payments.
 
